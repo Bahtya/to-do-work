@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Todowork.Models;
 using Todowork.Services;
 
@@ -13,6 +15,7 @@ namespace Todowork.ViewModels
     public sealed class MainViewModel : BaseNotify
     {
         private readonly TodoStore _store;
+        private readonly DispatcherTimer _itemsViewRefreshTimer;
         private string _newText;
         private bool _showCompleted;
         private TodoItem _selectedItem;
@@ -28,6 +31,14 @@ namespace Todowork.ViewModels
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
 
+            _itemsViewRefreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1) };
+            _itemsViewRefreshTimer.Tick += (s, e) =>
+            {
+                _itemsViewRefreshTimer.Stop();
+                try { ItemsView.Refresh(); } catch { }
+                try { CommandManager.InvalidateRequerySuggested(); } catch { }
+            };
+
             var viewSource = new CollectionViewSource { Source = _store.Items };
             ItemsView = viewSource.View;
             ItemsView.Filter = Filter;
@@ -37,6 +48,7 @@ namespace Todowork.ViewModels
             AddCommand = new RelayCommand(_ => Add(), _ => !string.IsNullOrWhiteSpace(NewText));
             DeleteCommand = new RelayCommand(p => Delete(p as TodoItem));
             TogglePinCommand = new RelayCommand(p => TogglePin(p as TodoItem));
+            ClearCompletedCommand = new RelayCommand(_ => ClearCompleted(), _ => _store.Items.Any(i => i.IsCompleted));
             ShowTodoCommand = new RelayCommand(_ => ShowCompleted = false);
             ShowCompletedCommand = new RelayCommand(_ => ShowCompleted = true);
             SetOverlayTextColorCommand = new RelayCommand(p =>
@@ -53,11 +65,33 @@ namespace Todowork.ViewModels
             _store.Items.CollectionChanged += Items_CollectionChanged;
         }
 
+        private void ScheduleItemsViewRefresh(int delayMs)
+        {
+            if (delayMs <= 0)
+            {
+                try { ItemsView.Refresh(); } catch { }
+                try { CommandManager.InvalidateRequerySuggested(); } catch { }
+                return;
+            }
+
+            try
+            {
+                _itemsViewRefreshTimer.Stop();
+                _itemsViewRefreshTimer.Interval = TimeSpan.FromMilliseconds(delayMs);
+                _itemsViewRefreshTimer.Start();
+            }
+            catch
+            {
+                try { ItemsView.Refresh(); } catch { }
+            }
+        }
+
         public ICollectionView ItemsView { get; }
 
         public ICommand AddCommand { get; }
         public ICommand DeleteCommand { get; }
         public ICommand TogglePinCommand { get; }
+        public ICommand ClearCompletedCommand { get; }
         public ICommand ShowTodoCommand { get; }
         public ICommand ShowCompletedCommand { get; }
         public ICommand SetOverlayTextColorCommand { get; }
@@ -296,27 +330,18 @@ namespace Todowork.ViewModels
 
         private void Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(TodoItem.IsCompleted) || e.PropertyName == nameof(TodoItem.IsPinned))
+            if (e.PropertyName == nameof(TodoItem.IsPinned))
             {
-                try
-                {
-                    var dispatcher = Application.Current?.Dispatcher;
-                    if (dispatcher != null)
-                    {
-                        dispatcher.BeginInvoke(new Action(() =>
-                        {
-                            try { ItemsView.Refresh(); } catch { }
-                        }));
-                    }
-                    else
-                    {
-                        ItemsView.Refresh();
-                    }
-                }
-                catch
-                {
-                    try { ItemsView.Refresh(); } catch { }
-                }
+                ScheduleItemsViewRefresh(0);
+                return;
+            }
+
+            if (e.PropertyName == nameof(TodoItem.IsCompleted))
+            {
+                var item = sender as TodoItem;
+                var shouldDelay = item != null && ((ShowCompleted && !item.IsCompleted) || (!ShowCompleted && item.IsCompleted));
+                ScheduleItemsViewRefresh(shouldDelay ? 220 : 0);
+                return;
             }
         }
 
@@ -339,7 +364,22 @@ namespace Todowork.ViewModels
         {
             if (item == null) return;
             _store.Remove(item);
-            ItemsView.Refresh();
+            ScheduleItemsViewRefresh(0);
+        }
+
+        private void ClearCompleted()
+        {
+            try
+            {
+                var completed = _store.Items.Where(i => i.IsCompleted).ToList();
+                foreach (var item in completed)
+                {
+                    _store.Remove(item);
+                }
+            }
+            catch { }
+
+            ScheduleItemsViewRefresh(0);
         }
 
         private void TogglePin(TodoItem item)
@@ -347,7 +387,7 @@ namespace Todowork.ViewModels
             if (item == null) return;
             if (item.IsCompleted) return;
             item.IsPinned = !item.IsPinned;
-            ItemsView.Refresh();
+            ScheduleItemsViewRefresh(0);
         }
     }
 }
