@@ -17,7 +17,7 @@ namespace Todowork.ViewModels
         private readonly TodoStore _store;
         private readonly DispatcherTimer _itemsViewRefreshTimer;
         private string _newText;
-        private bool _showCompleted;
+        private bool _isCompletedExpanded;
         private TodoItem _selectedItem;
         private bool _overlayShowBackground;
         private double _overlayLeftRatio;
@@ -36,21 +36,27 @@ namespace Todowork.ViewModels
             {
                 _itemsViewRefreshTimer.Stop();
                 try { ItemsView.Refresh(); } catch { }
+                try { CompletedItemsView.Refresh(); } catch { }
                 try { CommandManager.InvalidateRequerySuggested(); } catch { }
             };
 
             var viewSource = new CollectionViewSource { Source = _store.Items };
             ItemsView = viewSource.View;
-            ItemsView.Filter = Filter;
+            ItemsView.Filter = FilterTodo;
             ItemsView.SortDescriptions.Add(new SortDescription(nameof(TodoItem.IsPinned), ListSortDirection.Descending));
             ItemsView.SortDescriptions.Add(new SortDescription(nameof(TodoItem.CreatedAt), ListSortDirection.Descending));
+
+            var completedViewSource = new CollectionViewSource { Source = _store.Items };
+            CompletedItemsView = completedViewSource.View;
+            CompletedItemsView.Filter = FilterCompleted;
+            CompletedItemsView.SortDescriptions.Add(new SortDescription(nameof(TodoItem.CompletedAt), ListSortDirection.Descending));
+            CompletedItemsView.SortDescriptions.Add(new SortDescription(nameof(TodoItem.CreatedAt), ListSortDirection.Descending));
 
             AddCommand = new RelayCommand(_ => Add(), _ => !string.IsNullOrWhiteSpace(NewText));
             DeleteCommand = new RelayCommand(p => Delete(p as TodoItem));
             TogglePinCommand = new RelayCommand(p => TogglePin(p as TodoItem));
             ClearCompletedCommand = new RelayCommand(_ => ClearCompleted(), _ => _store.Items.Any(i => i.IsCompleted));
-            ShowTodoCommand = new RelayCommand(_ => ShowCompleted = false);
-            ShowCompletedCommand = new RelayCommand(_ => ShowCompleted = true);
+            ToggleCompletedExpandedCommand = new RelayCommand(_ => IsCompletedExpanded = !IsCompletedExpanded);
             SetOverlayTextColorCommand = new RelayCommand(p =>
             {
                 if (p == null) return;
@@ -70,6 +76,7 @@ namespace Todowork.ViewModels
             if (delayMs <= 0)
             {
                 try { ItemsView.Refresh(); } catch { }
+                try { CompletedItemsView.Refresh(); } catch { }
                 try { CommandManager.InvalidateRequerySuggested(); } catch { }
                 return;
             }
@@ -88,13 +95,34 @@ namespace Todowork.ViewModels
 
         public ICollectionView ItemsView { get; }
 
+        public ICollectionView CompletedItemsView { get; }
+
         public ICommand AddCommand { get; }
         public ICommand DeleteCommand { get; }
         public ICommand TogglePinCommand { get; }
         public ICommand ClearCompletedCommand { get; }
-        public ICommand ShowTodoCommand { get; }
-        public ICommand ShowCompletedCommand { get; }
+        public ICommand ToggleCompletedExpandedCommand { get; }
         public ICommand SetOverlayTextColorCommand { get; }
+
+        public int CompletedCount
+        {
+            get
+            {
+                try { return _store.Items.Count(i => i.IsCompleted); }
+                catch { return 0; }
+            }
+        }
+
+        public bool IsCompletedExpanded
+        {
+            get => _isCompletedExpanded;
+            set
+            {
+                if (_isCompletedExpanded == value) return;
+                _isCompletedExpanded = value;
+                OnPropertyChanged();
+            }
+        }
 
         public string NewText
         {
@@ -170,18 +198,6 @@ namespace Todowork.ViewModels
                     app?.SetOverlayShowBackground(_overlayShowBackground);
                 }
                 catch { }
-            }
-        }
-
-        public bool ShowCompleted
-        {
-            get => _showCompleted;
-            set
-            {
-                if (_showCompleted == value) return;
-                _showCompleted = value;
-                OnPropertyChanged();
-                ItemsView.Refresh();
             }
         }
 
@@ -301,10 +317,16 @@ namespace Todowork.ViewModels
             catch { }
         }
 
-        private bool Filter(object obj)
+        private bool FilterTodo(object obj)
         {
             if (!(obj is TodoItem item)) return false;
-            return ShowCompleted ? item.IsCompleted : !item.IsCompleted;
+            return !item.IsCompleted;
+        }
+
+        private bool FilterCompleted(object obj)
+        {
+            if (!(obj is TodoItem item)) return false;
+            return item.IsCompleted;
         }
 
         private void Items_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -325,7 +347,8 @@ namespace Todowork.ViewModels
                 }
             }
 
-            ItemsView.Refresh();
+            OnPropertyChanged(nameof(CompletedCount));
+            ScheduleItemsViewRefresh(0);
         }
 
         private void Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -338,9 +361,8 @@ namespace Todowork.ViewModels
 
             if (e.PropertyName == nameof(TodoItem.IsCompleted))
             {
-                var item = sender as TodoItem;
-                var shouldDelay = item != null && ((ShowCompleted && !item.IsCompleted) || (!ShowCompleted && item.IsCompleted));
-                ScheduleItemsViewRefresh(shouldDelay ? 220 : 0);
+                OnPropertyChanged(nameof(CompletedCount));
+                ScheduleItemsViewRefresh(220);
                 return;
             }
         }
@@ -351,13 +373,8 @@ namespace Todowork.ViewModels
             var item = _store.Add(text);
             if (item == null) return;
 
-            if (ShowCompleted)
-            {
-                ShowCompleted = false;
-            }
-
             NewText = string.Empty;
-            ItemsView.Refresh();
+            ScheduleItemsViewRefresh(0);
         }
 
         private void Delete(TodoItem item)

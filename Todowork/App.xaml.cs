@@ -28,6 +28,7 @@ namespace Todowork
         private TodoStore _store;
         private MainWindow _mainWindow;
         private OverlayWindow _overlayWindow;
+        private SettingsWindow _settingsWindow;
         private bool _overlayShouldShow = true;
         private bool _isExiting;
         private bool _startupInvoked;
@@ -203,6 +204,7 @@ namespace Todowork
 
             _trayService = new TrayService();
             _trayService.ShowMainRequested += (s1, e1) => TrayService.BringToFront(_mainWindow);
+            _trayService.SettingsRequested += (s1, e1) => ShowSettings();
             _trayService.ToggleOverlayRequested += (s1, e1) => ToggleOverlay();
             _trayService.ExitRequested += (s1, e1) => ExitApp();
             _trayService.Start();
@@ -232,6 +234,53 @@ namespace Todowork
             catch { }
 
             try { SaveUiState(); } catch { }
+        }
+
+        private void ShowSettings()
+        {
+            try
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        if (_settingsWindow == null)
+                        {
+                            _settingsWindow = new SettingsWindow();
+                            _settingsWindow.Closed += (s, e) =>
+                            {
+                                try { _settingsWindow = null; } catch { }
+                            };
+                        }
+
+                        if (_mainWindow != null)
+                        {
+                            _settingsWindow.DataContext = _mainWindow.DataContext;
+
+                            if (_mainWindow.IsVisible)
+                            {
+                                _settingsWindow.Owner = _mainWindow;
+                                _settingsWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                            }
+                            else
+                            {
+                                _settingsWindow.Owner = null;
+                                _settingsWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                            }
+                        }
+
+                        if (_settingsWindow.IsVisible)
+                        {
+                            _settingsWindow.Activate();
+                            return;
+                        }
+
+                        _settingsWindow.ShowDialog();
+                    }
+                    catch { }
+                }));
+            }
+            catch { }
         }
 
         public void SetOverlayTopRatio(double ratio)
