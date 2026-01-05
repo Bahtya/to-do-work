@@ -43,66 +43,13 @@
 
             <Grid Grid.Row="1" Margin="{StaticResource AppPadding}">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0" Margin="0,0,0,12">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-
-                <Button Grid.Column="0" Content="待办" Margin="0,0,6,0"
-                        Command="{Binding ShowTodoCommand}">
-                    <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource TabButton}">
-                            <Setter Property="Background" Value="{StaticResource BrushAccentLight}" />
-                            <Setter Property="BorderBrush" Value="{StaticResource BrushAccent}" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ShowCompleted}" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource BrushSurfaceAlt}" />
-                                    <Setter Property="BorderBrush" Value="{StaticResource BrushBorder}" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-                <Button Grid.Column="1" Content="已完成" Margin="6,0,0,0"
-                        Command="{Binding ShowCompletedCommand}">
-                    <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource TabButton}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ShowCompleted}" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource BrushAccentLight}" />
-                                    <Setter Property="BorderBrush" Value="{StaticResource BrushAccent}" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-
-                <Button Grid.Column="2" Content="清空" Margin="12,0,0,0"
-                        Command="{Binding ClearCompletedCommand}">
-                    <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource SecondaryButton}">
-                            <Setter Property="Visibility" Value="Collapsed" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ShowCompleted}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding ItemsView.IsEmpty}" Value="True">
-                                    <Setter Property="Visibility" Value="Collapsed" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-            </Grid>
-
-            <Grid Grid.Row="1">
+            <Grid Grid.Row="0">
                 <ListView ItemsSource="{Binding ItemsView}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" Margin="0,0,0,10" HorizontalContentAlignment="Stretch"
                       VirtualizingPanel.IsVirtualizing="True"
                       VirtualizingPanel.VirtualizationMode="Recycling"
@@ -245,17 +192,173 @@
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Text" Value="暂无待办，输入后回车添加" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ShowCompleted}" Value="True">
-                                    <Setter Property="Text" Value="暂无已完成事项" />
-                                </DataTrigger>
-                            </Style.Triggers>
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
             </Grid>
 
-            <TextBox Grid.Row="2" Height="34" VerticalContentAlignment="Center"
+            <Grid Grid.Row="1" Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0" Command="{Binding ToggleCompletedExpandedCommand}" Height="34" Padding="10,0"
+                        Background="{StaticResource BrushSurfaceAlt}" BorderBrush="{StaticResource BrushBorder}" BorderThickness="1">
+                    <Button.Content>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock VerticalAlignment="Center" Foreground="{StaticResource BrushTextPrimary}"
+                                       FontFamily="{StaticResource AppFontFamily}" FontSize="{StaticResource FontSizeBody}"
+                                       Text="{Binding CompletedCount, StringFormat=已完成 ({0})}" />
+                            <TextBlock x:Name="CompletedChevron" Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center"
+                                       FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="{StaticResource BrushTextSecondary}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="&#xE70D;" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsCompletedExpanded}" Value="True">
+                                                <Setter Property="Text" Value="&#xE70E;" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+                    </Button.Content>
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#11000000" />
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="Background" Value="#22000000" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
+                <Button Grid.Column="1" Content="清空" Margin="8,0,0,0"
+                        Command="{Binding ClearCompletedCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource SecondaryButton}">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding CompletedCount}" Value="0">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Grid>
+
+            <Grid Grid.Row="2" Visibility="{Binding IsCompletedExpanded, Converter={StaticResource BoolToVisibility}}" Margin="0,0,0,10">
+                <ListView ItemsSource="{Binding CompletedItemsView}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" Margin="0" HorizontalContentAlignment="Stretch"
+                      VirtualizingPanel.IsVirtualizing="True"
+                      VirtualizingPanel.VirtualizationMode="Recycling"
+                      ScrollViewer.CanContentScroll="True"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                      Focusable="False" IsTabStop="False" FocusVisualStyle="{x:Null}"
+                      KeyboardNavigation.TabNavigation="None" KeyboardNavigation.DirectionalNavigation="None"
+                      IsSynchronizedWithCurrentItem="False"
+                      BorderThickness="0" BorderBrush="Transparent" Background="Transparent">
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel />
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="Focusable" Value="False" />
+                            <Setter Property="OverridesDefaultStyle" Value="True" />
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListViewItem">
+                                        <Border Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                SnapsToDevicePixels="True">
+                                            <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="{StaticResource BrushSurface}" BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+                                    CornerRadius="{StaticResource RadiusM}" Padding="8,6" Margin="0,4" MinHeight="40" Opacity="0.9">
+                                <Border.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="删除"
+                                                  Command="{Binding PlacementTarget.DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                  CommandParameter="{Binding}" />
+                                    </ContextMenu>
+                                </Border.ContextMenu>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="32" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <CheckBox Grid.Column="0" VerticalAlignment="Center" IsChecked="{Binding IsCompleted, Mode=TwoWay}"
+                                              Focusable="False" IsTabStop="False" FocusVisualStyle="{x:Null}" />
+
+                                    <Grid Grid.Column="1" Margin="8,0,8,0" VerticalAlignment="Center">
+                                        <TextBlock x:Name="CompletedViewText" Text="{Binding Text}" TextWrapping="Wrap" TextDecorations="Strikethrough" />
+                                        <TextBox x:Name="CompletedEditText" Text="{Binding EditText, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap"
+                                                 Visibility="Collapsed" BorderBrush="{StaticResource BrushAccent}" BorderThickness="1" Background="{StaticResource BrushSurface}"
+                                                 Padding="4,2" Loaded="EditTextBox_Loaded" PreviewKeyDown="EditTextBox_PreviewKeyDown"
+                                                 LostFocus="EditTextBox_LostFocus" />
+                                    </Grid>
+
+                                    <StackPanel x:Name="CompletedActionPanel" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right"
+                                                Opacity="0" IsHitTestVisible="False">
+                                        <Button Style="{StaticResource ItemIconButton}" ToolTip="删除"
+                                                Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                CommandParameter="{Binding}" Focusable="False" IsTabStop="False" FocusVisualStyle="{x:Null}">
+                                            <TextBlock Text="&#xE74D;" />
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                                    <Setter TargetName="CompletedViewText" Property="Visibility" Value="Collapsed" />
+                                    <Setter TargetName="CompletedEditText" Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListViewItem}, Path=IsMouseOver}" Value="True">
+                                    <Setter TargetName="CompletedActionPanel" Property="Opacity" Value="1" />
+                                    <Setter TargetName="CompletedActionPanel" Property="IsHitTestVisible" Value="True" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource BrushTextSecondary}" FontSize="{StaticResource FontSizeBody}"
+                           Visibility="{Binding CompletedItemsView.IsEmpty, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock.Text>暂无已完成事项</TextBlock.Text>
+                </TextBlock>
+            </Grid>
+
+            <TextBox Grid.Row="3" Height="34" VerticalContentAlignment="Center"
                  Text="{Binding NewText, UpdateSourceTrigger=PropertyChanged}"
                  Tag="输入待办事项，回车键确认"
                  Style="{StaticResource WatermarkTextBox}"

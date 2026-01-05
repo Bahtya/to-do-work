@@ -11,6 +11,7 @@ namespace Todowork.Services
         private NotifyIcon _notifyIcon;
 
         public event EventHandler ShowMainRequested;
+        public event EventHandler SettingsRequested;
         public event EventHandler ToggleOverlayRequested;
         public event EventHandler ExitRequested;
 
@@ -42,6 +43,9 @@ namespace Todowork.Services
             var showItem = new ToolStripMenuItem("显示面板");
             showItem.Click += (s, e) => ShowMainRequested?.Invoke(this, EventArgs.Empty);
 
+            var settingsItem = new ToolStripMenuItem("设置");
+            settingsItem.Click += (s, e) => SettingsRequested?.Invoke(this, EventArgs.Empty);
+
             var toggleOverlayItem = new ToolStripMenuItem("显示/隐藏置顶浮窗");
             toggleOverlayItem.Click += (s, e) => ToggleOverlayRequested?.Invoke(this, EventArgs.Empty);
 
@@ -51,6 +55,7 @@ namespace Todowork.Services
             menu.Items.Add(autoStartItem);
             menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add(showItem);
+            menu.Items.Add(settingsItem);
             menu.Items.Add(toggleOverlayItem);
             menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add(exitItem);
