@@ -7,11 +7,14 @@
         Icon="Assets/TodoworkTD_gray.ico"
         WindowStyle="None"
         ResizeMode="CanResize"
+        PreviewKeyDown="Window_PreviewKeyDown"
         Closing="MainWindow_Closing">
     <shell:WindowChrome.WindowChrome>
         <shell:WindowChrome CaptionHeight="34" ResizeBorderThickness="6" CornerRadius="0" GlassFrameThickness="0" UseAeroCaptionButtons="False" />
     </shell:WindowChrome.WindowChrome>
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+
         <Style x:Key="WatermarkTextBox" TargetType="TextBox">
             <Setter Property="Template">
                 <Setter.Value>
@@ -91,6 +94,27 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="ItemIconButton" TargetType="Button">
+            <Setter Property="Width" Value="28" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Foreground" Value="#FF444444" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#11000000" />
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#22000000" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
     <Grid Background="White">
         <Grid.RowDefinitions>
@@ -130,6 +154,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <Button Grid.Column="0" Content="待办" Margin="0,0,6,0"
@@ -160,119 +185,167 @@
                         </Style>
                     </Button.Style>
                 </Button>
+
+                <Button Grid.Column="2" Content="清空" Margin="12,0,0,0" Height="34" Padding="10,0"
+                        Command="{Binding ClearCompletedCommand}" BorderBrush="#FFD0D0D0" BorderThickness="1" Background="#FFF1F1F1">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ShowCompleted}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ItemsView.IsEmpty}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
             </Grid>
 
-            <ListView Grid.Row="1" ItemsSource="{Binding ItemsView}" Margin="0,0,0,10" HorizontalContentAlignment="Stretch"
-                  Focusable="False" IsTabStop="False" FocusVisualStyle="{x:Null}"
-                  KeyboardNavigation.TabNavigation="None" KeyboardNavigation.DirectionalNavigation="None"
-                  IsSynchronizedWithCurrentItem="False"
-                  BorderThickness="0" BorderBrush="Transparent" Background="Transparent">
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="Focusable" Value="False" />
-                    <Setter Property="OverridesDefaultStyle" Value="True" />
-                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-                    <Setter Property="BorderThickness" Value="0" />
-                    <Setter Property="BorderBrush" Value="Transparent" />
-                    <Setter Property="Background" Value="Transparent" />
-                    <Setter Property="Padding" Value="0" />
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="ListViewItem">
-                                <Border Background="{TemplateBinding Background}"
-                                        BorderBrush="{TemplateBinding BorderBrush}"
-                                        BorderThickness="{TemplateBinding BorderThickness}"
-                                        SnapsToDevicePixels="True">
-                                    <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
-                                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
-                                </Border>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                    <Style.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="Transparent" />
+            <Grid Grid.Row="1">
+                <ListView ItemsSource="{Binding ItemsView}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" Margin="0,0,0,10" HorizontalContentAlignment="Stretch"
+                      Focusable="False" IsTabStop="False" FocusVisualStyle="{x:Null}"
+                      KeyboardNavigation.TabNavigation="None" KeyboardNavigation.DirectionalNavigation="None"
+                      IsSynchronizedWithCurrentItem="False"
+                      BorderThickness="0" BorderBrush="Transparent" Background="Transparent">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="Focusable" Value="False" />
+                            <Setter Property="OverridesDefaultStyle" Value="True" />
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                            <Setter Property="BorderThickness" Value="0" />
                             <Setter Property="BorderBrush" Value="Transparent" />
-                        </Trigger>
-                        <Trigger Property="IsSelected" Value="True">
                             <Setter Property="Background" Value="Transparent" />
-                            <Setter Property="BorderBrush" Value="Transparent" />
-                        </Trigger>
-                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                            <Setter Property="Background" Value="Transparent" />
-                            <Setter Property="BorderBrush" Value="Transparent" />
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </ListView.ItemContainerStyle>
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <Border Background="White" BorderBrush="#FFE0E0E0" BorderThickness="1" CornerRadius="6" Padding="8,6" Margin="0,4">
-                        <Border.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Command="{Binding PlacementTarget.DataContext.TogglePinCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                          CommandParameter="{Binding}">
-                                    <MenuItem.Style>
-                                        <Style TargetType="MenuItem">
-                                            <Setter Property="Header" Value="置顶" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsPinned}" Value="True">
-                                                    <Setter Property="Header" Value="取消置顶" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </MenuItem.Style>
-                                </MenuItem>
-                                <MenuItem Header="删除"
-                                          Command="{Binding PlacementTarget.DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                          CommandParameter="{Binding}" />
-                            </ContextMenu>
-                        </Border.ContextMenu>
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListViewItem">
+                                        <Border Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                SnapsToDevicePixels="True">
+                                            <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="BorderBrush" Value="Transparent" />
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="BorderBrush" Value="Transparent" />
+                                </Trigger>
+                                <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="BorderBrush" Value="Transparent" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="White" BorderBrush="#FFE0E0E0" BorderThickness="1" CornerRadius="6" Padding="8,6" Margin="0,4" MinHeight="40">
+                                <Border.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Command="{Binding PlacementTarget.DataContext.TogglePinCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                  CommandParameter="{Binding}">
+                                            <MenuItem.Style>
+                                                <Style TargetType="MenuItem">
+                                                    <Setter Property="Header" Value="置顶" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsPinned}" Value="True">
+                                                            <Setter Property="Header" Value="取消置顶" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </MenuItem.Style>
+                                        </MenuItem>
+                                        <MenuItem Header="删除"
+                                                  Command="{Binding PlacementTarget.DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                  CommandParameter="{Binding}" />
+                                    </ContextMenu>
+                                </Border.ContextMenu>
 
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="70" />
+                                    </Grid.ColumnDefinitions>
 
-                            <CheckBox Grid.Column="0" VerticalAlignment="Center" IsChecked="{Binding IsCompleted, Mode=TwoWay}"
-                                      Focusable="False" IsTabStop="False" FocusVisualStyle="{x:Null}" />
+                                    <CheckBox Grid.Column="0" VerticalAlignment="Center" IsChecked="{Binding IsCompleted, Mode=TwoWay}"
+                                              Focusable="False" IsTabStop="False" FocusVisualStyle="{x:Null}" />
 
-                            <TextBlock Grid.Column="1" Margin="8,0,8,0" VerticalAlignment="Center" Text="{Binding Text}" TextWrapping="Wrap" />
+                                    <Grid Grid.Column="1" Margin="8,0,8,0" VerticalAlignment="Center">
+                                        <TextBlock x:Name="ViewText" Text="{Binding Text}" TextWrapping="Wrap"
+                                                   MouseLeftButtonDown="TodoText_MouseLeftButtonDown" />
+                                        <TextBox x:Name="EditText" Text="{Binding EditText, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap"
+                                                 Visibility="Collapsed" BorderBrush="#FF67B8FF" BorderThickness="1" Background="White"
+                                                 Padding="4,2" Loaded="EditTextBox_Loaded" PreviewKeyDown="EditTextBox_PreviewKeyDown"
+                                                 LostFocus="EditTextBox_LostFocus" />
+                                    </Grid>
 
-                            <StackPanel x:Name="ActionPanel" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Visibility="Collapsed">
-                                <Button Margin="0,0,6,0"
-                                        Command="{Binding DataContext.TogglePinCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                        CommandParameter="{Binding}" Focusable="False" IsTabStop="False" FocusVisualStyle="{x:Null}">
-                                    <Button.Style>
-                                        <Style TargetType="Button" BasedOn="{StaticResource ItemActionButton}">
-                                            <Setter Property="Content" Value="置顶" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsPinned}" Value="True">
-                                                    <Setter Property="Content" Value="取消" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Button.Style>
-                                </Button>
+                                    <StackPanel x:Name="ActionPanel" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right"
+                                                Opacity="0" IsHitTestVisible="False">
+                                        <Button ToolTip="置顶" Margin="0,0,4,0"
+                                                Command="{Binding DataContext.TogglePinCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                CommandParameter="{Binding}" Focusable="False" IsTabStop="False" FocusVisualStyle="{x:Null}">
+                                            <TextBlock Text="&#xE718;" />
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource ItemIconButton}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsPinned}" Value="True">
+                                                            <Setter Property="Foreground" Value="#FF67B8FF" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
 
-                                <Button Style="{StaticResource ItemActionButton}" Content="删除" Focusable="False" IsTabStop="False" FocusVisualStyle="{x:Null}"
-                                        Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                        CommandParameter="{Binding}" />
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-                    <DataTemplate.Triggers>
-                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListViewItem}, Path=IsMouseOver}" Value="True">
-                            <Setter TargetName="ActionPanel" Property="Visibility" Value="Visible" />
-                        </DataTrigger>
-                    </DataTemplate.Triggers>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+                                        <Button Style="{StaticResource ItemIconButton}" ToolTip="删除"
+                                                Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                CommandParameter="{Binding}" Focusable="False" IsTabStop="False" FocusVisualStyle="{x:Null}">
+                                            <TextBlock Text="&#xE74D;" />
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                                    <Setter TargetName="ViewText" Property="Visibility" Value="Collapsed" />
+                                    <Setter TargetName="EditText" Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListViewItem}, Path=IsMouseOver}" Value="True">
+                                    <Setter TargetName="ActionPanel" Property="Opacity" Value="1" />
+                                    <Setter TargetName="ActionPanel" Property="IsHitTestVisible" Value="True" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#FF888888" FontSize="13"
+                           Visibility="{Binding ItemsView.IsEmpty, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="暂无待办，输入后回车添加" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ShowCompleted}" Value="True">
+                                    <Setter Property="Text" Value="暂无已完成事项" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
 
             <TextBox Grid.Row="2" Height="34" VerticalContentAlignment="Center"
                  Text="{Binding NewText, UpdateSourceTrigger=PropertyChanged}"

@@ -12,6 +12,9 @@ namespace Todowork.Models
         private bool _isPinned;
         private DateTime? _completedAt;
 
+        private bool _isEditing;
+        private string _editText;
+
         [DataMember]
         public Guid Id { get; set; }
 
@@ -81,6 +84,30 @@ namespace Todowork.Models
             {
                 if (_completedAt == value) return;
                 _completedAt = value;
+                OnPropertyChanged();
+            }
+        }
+
+        [IgnoreDataMember]
+        public bool IsEditing
+        {
+            get => _isEditing;
+            set
+            {
+                if (_isEditing == value) return;
+                _isEditing = value;
+                OnPropertyChanged();
+            }
+        }
+
+        [IgnoreDataMember]
+        public string EditText
+        {
+            get => _editText;
+            set
+            {
+                if (_editText == value) return;
+                _editText = value;
                 OnPropertyChanged();
             }
         }
