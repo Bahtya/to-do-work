@@ -70,28 +70,12 @@ namespace Todowork
             _mutex = new Mutex(true, InstanceMutexName, out var createdNew);
             if (!createdNew)
             {
-                var signaled = false;
                 try
                 {
                     using (var existing = EventWaitHandle.OpenExisting(ShowMainEventName))
                     {
                         existing.Set();
-                        signaled = true;
                     }
-                }
-                catch { }
-
-                try
-                {
-                    var msg = signaled
-                        ? "Todowork 已在运行，已为你切换到现有窗口。\r\n\r\n提示：本次启动进程会自动退出，这是正常行为。"
-                        : "Todowork 已在运行，但无法唤醒现有窗口。\r\n\r\n请在任务栏托盘(含隐藏图标)中找到 Todowork 并打开，或先退出后再启动。\r\n\r\n提示：本次启动进程会自动退出，这是正常行为。";
-
-                    MessageBox.Show(
-                        msg,
-                        "Todowork",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
                 }
                 catch { }
 
@@ -204,7 +188,7 @@ namespace Todowork
 
             _trayService = new TrayService();
             _trayService.ShowMainRequested += (s1, e1) => TrayService.BringToFront(_mainWindow);
-            _trayService.SettingsRequested += (s1, e1) => ShowSettings();
+            _trayService.SettingsRequested += (s1, e1) => RequestShowSettings();
             _trayService.ToggleOverlayRequested += (s1, e1) => ToggleOverlay();
             _trayService.ExitRequested += (s1, e1) => ExitApp();
             _trayService.Start();
@@ -236,49 +220,60 @@ namespace Todowork
             try { SaveUiState(); } catch { }
         }
 
-        private void ShowSettings()
+        public void RequestShowSettings(Window requestedOwner = null)
         {
             try
             {
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    try
-                    {
-                        if (_settingsWindow == null)
-                        {
-                            _settingsWindow = new SettingsWindow();
-                            _settingsWindow.Closed += (s, e) =>
-                            {
-                                try { _settingsWindow = null; } catch { }
-                            };
-                        }
-
-                        if (_mainWindow != null)
-                        {
-                            _settingsWindow.DataContext = _mainWindow.DataContext;
-
-                            if (_mainWindow.IsVisible)
-                            {
-                                _settingsWindow.Owner = _mainWindow;
-                                _settingsWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                            }
-                            else
-                            {
-                                _settingsWindow.Owner = null;
-                                _settingsWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                            }
-                        }
-
-                        if (_settingsWindow.IsVisible)
-                        {
-                            _settingsWindow.Activate();
-                            return;
-                        }
-
-                        _settingsWindow.ShowDialog();
-                    }
-                    catch { }
+                    ShowSettingsCore(requestedOwner);
                 }));
+            }
+            catch { }
+        }
+
+        private void ShowSettingsCore(Window requestedOwner)
+        {
+            try
+            {
+                if (_settingsWindow == null)
+                {
+                    _settingsWindow = new SettingsWindow();
+                    _settingsWindow.ShowInTaskbar = false;
+                    _settingsWindow.Closed += (s, e) =>
+                    {
+                        try { _settingsWindow = null; } catch { }
+                    };
+                }
+
+                if (_mainWindow != null)
+                {
+                    _settingsWindow.DataContext = _mainWindow.DataContext;
+                }
+
+                if (_settingsWindow.IsVisible)
+                {
+                    _settingsWindow.Activate();
+                    return;
+                }
+
+                if (requestedOwner != null && requestedOwner.IsVisible)
+                {
+                    _settingsWindow.Owner = requestedOwner;
+                    _settingsWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                }
+                else if (_mainWindow != null && _mainWindow.IsVisible)
+                {
+                    _settingsWindow.Owner = _mainWindow;
+                    _settingsWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                }
+                else
+                {
+                    _settingsWindow.Owner = null;
+                    _settingsWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                }
+
+                _settingsWindow.ShowDialog();
             }
             catch { }
         }
