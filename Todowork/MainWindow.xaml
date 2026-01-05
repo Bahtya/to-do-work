@@ -231,14 +231,29 @@
                     </Button.Content>
                     <Button.Style>
                         <Style TargetType="Button">
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#11000000" />
-                                </Trigger>
-                                <Trigger Property="IsPressed" Value="True">
-                                    <Setter Property="Background" Value="#22000000" />
-                                </Trigger>
-                            </Style.Triggers>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="border" Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                CornerRadius="{StaticResource RadiusS}"
+                                                SnapsToDevicePixels="True">
+                                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                              Margin="{TemplateBinding Padding}" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="border" Property="Background" Value="#E8E8E8" />
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter TargetName="border" Property="Background" Value="#D8D8D8" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
                         </Style>
                     </Button.Style>
                 </Button>
@@ -246,8 +261,44 @@
                 <Button Grid.Column="1" Content="清空" Margin="8,0,0,0"
                         Command="{Binding ClearCompletedCommand}">
                     <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource SecondaryButton}">
+                        <Style TargetType="Button">
+                            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
+                            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}" />
+                            <Setter Property="Height" Value="34" />
+                            <Setter Property="Padding" Value="16,0" />
+                            <Setter Property="Background" Value="{StaticResource BrushSurfaceAlt}" />
+                            <Setter Property="BorderBrush" Value="{StaticResource BrushBorder}" />
+                            <Setter Property="BorderThickness" Value="1" />
+                            <Setter Property="Foreground" Value="{StaticResource BrushTextPrimary}" />
                             <Setter Property="Visibility" Value="Visible" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="border" Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                CornerRadius="{StaticResource RadiusS}"
+                                                SnapsToDevicePixels="True">
+                                            <ContentPresenter HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center"
+                                                              Margin="{TemplateBinding Padding}"
+                                                              TextElement.Foreground="{TemplateBinding Foreground}" />
+                            </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="border" Property="Background" Value="#FFE8E8E8" />
+                                                <Setter TargetName="border" Property="BorderBrush" Value="#FFB8B8B8" />
+                                                <Setter Property="Foreground" Value="{StaticResource BrushDanger}" />
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter TargetName="border" Property="Background" Value="#FFD8D8D8" />
+                                                <Setter TargetName="border" Property="BorderBrush" Value="#FFA8A8A8" />
+                                                <Setter Property="Foreground" Value="{StaticResource BrushDanger}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding CompletedCount}" Value="0">
                                     <Setter Property="Visibility" Value="Collapsed" />
