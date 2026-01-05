@@ -26,12 +26,12 @@ jobs:
       run: nuget restore Todowork.sln
 
     - name: Build x86 Release
-      run: msbuild Todowork.sln /p:Configuration=Release /p:Platform=x86 /p:OutputPath=..\output\
+      run: msbuild Todowork.sln /p:Configuration=Release /p:Platform=x86
 
     - name: Create Release and Upload Asset
       uses: softprops/action-gh-release@v1
       with:
-        files: ./Todowork/output/Todowork.exe
+        files: ./Todowork/bin/x86/Release/Todowork.exe
         name: Release ${{ github.ref_name }}
         draft: false
         prerelease: false
