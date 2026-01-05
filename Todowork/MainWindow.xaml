@@ -170,8 +170,8 @@
             <UniformGrid Grid.Row="3" Grid.Column="1" Rows="1" Columns="6" Margin="0,2,0,0">
                 <Button Width="24" Height="24" Padding="0" Margin="0,0,6,0" Background="#FFFFFFFF" BorderBrush="#66000000" BorderThickness="1"
                         Command="{Binding SetOverlayTextColorCommand}" CommandParameter="#FFFFFFFF" Focusable="False" IsTabStop="False" FocusVisualStyle="{x:Null}" />
-                <Button Width="24" Height="24" Padding="0" Margin="0,0,6,0" Background="#FFFFD54F" BorderBrush="#66000000" BorderThickness="1"
-                        Command="{Binding SetOverlayTextColorCommand}" CommandParameter="#FFFFD54F" Focusable="False" IsTabStop="False" FocusVisualStyle="{x:Null}" />
+                <Button Width="24" Height="24" Padding="0" Margin="0,0,6,0" Background="#FF000000" BorderBrush="#66000000" BorderThickness="1"
+                        Command="{Binding SetOverlayTextColorCommand}" CommandParameter="#FF000000" Focusable="False" IsTabStop="False" FocusVisualStyle="{x:Null}" />
                 <Button Width="24" Height="24" Padding="0" Margin="0,0,6,0" Background="#FF4DD0E1" BorderBrush="#66000000" BorderThickness="1"
                         Command="{Binding SetOverlayTextColorCommand}" CommandParameter="#FF4DD0E1" Focusable="False" IsTabStop="False" FocusVisualStyle="{x:Null}" />
                 <Button Width="24" Height="24" Padding="0" Margin="0,0,6,0" Background="#FF81C784" BorderBrush="#66000000" BorderThickness="1"
