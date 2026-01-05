@@ -9,9 +9,47 @@ namespace Todowork
 {
     public partial class MainWindow : Window
     {
+        private SettingsWindow _settingsWindow;
+
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void OpenSettings_Click(object sender, RoutedEventArgs e)
+        {
+            if (_settingsWindow == null || !_settingsWindow.IsLoaded)
+            {
+                _settingsWindow = new SettingsWindow
+                {
+                    Owner = this,
+                    DataContext = DataContext
+                };
+
+                _settingsWindow.Closed += (s, _) => { _settingsWindow = null; };
+            }
+            else
+            {
+                _settingsWindow.DataContext = DataContext;
+            }
+
+            _settingsWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            _settingsWindow.ShowInTaskbar = false;
+            _settingsWindow.ShowDialog();
+        }
+
+        private void Close_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                DragMove();
+            }
+            catch { }
         }
 
         private void NewTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
