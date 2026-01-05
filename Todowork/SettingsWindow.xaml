@@ -4,7 +4,7 @@
         Title="设置" Height="420" Width="420"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner">
-    <Grid Margin="12">
+    <Grid Margin="{StaticResource AppPadding}" Background="{StaticResource BrushSurface}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -18,16 +18,20 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <CheckBox Grid.Row="0" Grid.Column="0" Content="显示背景" IsChecked="{Binding OverlayShowBackground, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Margin="0,0,8,10" />
+        <CheckBox Grid.Row="0" Grid.Column="0" Content="显示背景" IsChecked="{Binding OverlayShowBackground, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Margin="0,0,8,10"
+                  FontFamily="{StaticResource AppFontFamily}" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource BrushTextPrimary}" />
         <Slider Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="1" Value="{Binding OverlayBackgroundOpacity, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="文字透明度" VerticalAlignment="Center" Margin="0,0,8,10" />
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="文字透明度" VerticalAlignment="Center" Margin="0,0,8,10"
+                   FontFamily="{StaticResource AppFontFamily}" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource BrushTextPrimary}" />
         <Slider Grid.Row="1" Grid.Column="1" Minimum="0.1" Maximum="1" Value="{Binding OverlayTextOpacity, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Text="字体大小" VerticalAlignment="Center" Margin="0,0,8,10" />
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="字体大小" VerticalAlignment="Center" Margin="0,0,8,10"
+                   FontFamily="{StaticResource AppFontFamily}" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource BrushTextPrimary}" />
         <Slider Grid.Row="2" Grid.Column="1" Minimum="10" Maximum="28" Value="{Binding OverlayTextFontSize, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Text="文字颜色" VerticalAlignment="Center" Margin="0,0,8,0" />
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="文字颜色" VerticalAlignment="Center" Margin="0,0,8,0"
+                   FontFamily="{StaticResource AppFontFamily}" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource BrushTextPrimary}" />
         <UniformGrid Grid.Row="3" Grid.Column="1" Rows="1" Columns="6" Margin="0,2,0,10">
             <Button Width="24" Height="24" Padding="0" Margin="0,0,6,0" Background="#FFFFFFFF" BorderBrush="#66000000" BorderThickness="1"
                     Command="{Binding SetOverlayTextColorCommand}" CommandParameter="#FFFFFFFF" Focusable="False" IsTabStop="False" FocusVisualStyle="{x:Null}" />
@@ -43,10 +47,12 @@
                     Command="{Binding SetOverlayTextColorCommand}" CommandParameter="#FFF48FB1" Focusable="False" IsTabStop="False" FocusVisualStyle="{x:Null}" />
         </UniformGrid>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Text="水平位置" VerticalAlignment="Center" Margin="0,0,8,10" />
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="水平位置" VerticalAlignment="Center" Margin="0,0,8,10"
+                   FontFamily="{StaticResource AppFontFamily}" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource BrushTextPrimary}" />
         <Slider Grid.Row="4" Grid.Column="1" Minimum="0" Maximum="1" Value="{Binding OverlayLeftRatio, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
 
-        <TextBlock Grid.Row="5" Grid.Column="0" Text="垂直位置" VerticalAlignment="Center" Margin="0,0,8,0" />
+        <TextBlock Grid.Row="5" Grid.Column="0" Text="垂直位置" VerticalAlignment="Center" Margin="0,0,8,0"
+                   FontFamily="{StaticResource AppFontFamily}" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource BrushTextPrimary}" />
         <Slider Grid.Row="5" Grid.Column="1" Minimum="0" Maximum="1" Value="{Binding OverlayTopRatio, UpdateSourceTrigger=PropertyChanged}" />
     </Grid>
 </Window>
