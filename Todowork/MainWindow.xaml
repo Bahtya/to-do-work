@@ -12,40 +12,41 @@
     <shell:WindowChrome.WindowChrome>
         <shell:WindowChrome CaptionHeight="34" ResizeBorderThickness="6" CornerRadius="0" GlassFrameThickness="0" UseAeroCaptionButtons="False" />
     </shell:WindowChrome.WindowChrome>
-    <Grid Background="{StaticResource BrushSurface}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-
-        <Border Grid.Row="0" Background="{StaticResource BrushSurface}" BorderBrush="{StaticResource BrushBorderSubtle}" BorderThickness="0,0,0,1"
-                MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
-            <Grid Height="34">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-
-                <TextBlock Text="Todowork" VerticalAlignment="Center" Margin="12,0,0,0" Foreground="{StaticResource BrushTextPrimary}"
-                           FontFamily="{StaticResource AppFontFamily}" FontSize="{StaticResource FontSizeTitle}" />
-
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Stretch">
-                    <Button Style="{StaticResource TitleBarButton}" ToolTip="设置"
-                            Click="OpenSettings_Click" shell:WindowChrome.IsHitTestVisibleInChrome="True">
-                        <TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="14" />
-                    </Button>
-                    <Button Content="✕" Style="{StaticResource TitleBarButton}" Foreground="{StaticResource BrushDanger}"
-                            Click="Close_Click" shell:WindowChrome.IsHitTestVisibleInChrome="True" />
-                </StackPanel>
-            </Grid>
-        </Border>
-
-        <Grid Grid.Row="1" Margin="{StaticResource AppPadding}">
+    <Border BorderBrush="{StaticResource BrushBorder}" BorderThickness="1" Background="{StaticResource BrushSurface}">
+        <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="{StaticResource BrushSurface}" BorderBrush="{StaticResource BrushBorderSubtle}" BorderThickness="0,0,0,1"
+                    MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Grid Height="34">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="Todowork" VerticalAlignment="Center" Margin="12,0,0,0" Foreground="{StaticResource BrushTextPrimary}"
+                               FontFamily="{StaticResource AppFontFamily}" FontSize="{StaticResource FontSizeTitle}" />
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Stretch">
+                        <Button Style="{StaticResource TitleBarButton}" ToolTip="设置"
+                                Click="OpenSettings_Click" shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                            <TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="14" />
+                        </Button>
+                        <Button Content="✕" Style="{StaticResource TitleBarButton}" Foreground="{StaticResource BrushDanger}"
+                                Click="Close_Click" shell:WindowChrome.IsHitTestVisibleInChrome="True" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="1" Margin="{StaticResource AppPadding}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
             <Grid Grid.Row="0" Margin="0,0,0,12">
                 <Grid.ColumnDefinitions>
@@ -103,10 +104,19 @@
 
             <Grid Grid.Row="1">
                 <ListView ItemsSource="{Binding ItemsView}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" Margin="0,0,0,10" HorizontalContentAlignment="Stretch"
+                      VirtualizingPanel.IsVirtualizing="True"
+                      VirtualizingPanel.VirtualizationMode="Recycling"
+                      ScrollViewer.CanContentScroll="True"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto"
                       Focusable="False" IsTabStop="False" FocusVisualStyle="{x:Null}"
                       KeyboardNavigation.TabNavigation="None" KeyboardNavigation.DirectionalNavigation="None"
                       IsSynchronizedWithCurrentItem="False"
                       BorderThickness="0" BorderBrush="Transparent" Background="Transparent">
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel />
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
                             <Setter Property="Focusable" Value="False" />
@@ -251,6 +261,7 @@
                  Style="{StaticResource WatermarkTextBox}"
                  BorderBrush="{StaticResource BrushBorder}" BorderThickness="1" Background="{StaticResource BrushSurface}" Padding="6,0,6,0"
                  PreviewKeyDown="NewTextBox_PreviewKeyDown" />
+            </Grid>
         </Grid>
-    </Grid>
+    </Border>
 </Window>
