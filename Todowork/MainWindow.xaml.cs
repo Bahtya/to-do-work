@@ -10,8 +10,6 @@ namespace Todowork
 {
     public partial class MainWindow : Window
     {
-        private SettingsWindow _settingsWindow;
-
         public MainWindow()
         {
             InitializeComponent();
@@ -19,24 +17,8 @@ namespace Todowork
 
         private void OpenSettings_Click(object sender, RoutedEventArgs e)
         {
-            if (_settingsWindow == null || !_settingsWindow.IsLoaded)
-            {
-                _settingsWindow = new SettingsWindow
-                {
-                    Owner = this,
-                    DataContext = DataContext
-                };
-
-                _settingsWindow.Closed += (s, _) => { _settingsWindow = null; };
-            }
-            else
-            {
-                _settingsWindow.DataContext = DataContext;
-            }
-
-            _settingsWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            _settingsWindow.ShowInTaskbar = false;
-            _settingsWindow.ShowDialog();
+            var app = Application.Current as App;
+            app?.RequestShowSettings(this);
         }
 
         private void Close_Click(object sender, RoutedEventArgs e)
