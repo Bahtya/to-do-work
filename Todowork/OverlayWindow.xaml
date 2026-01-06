@@ -11,15 +11,25 @@
         ResizeMode="NoResize"
         Loaded="OverlayWindow_Loaded"
         SizeChanged="OverlayWindow_SizeChanged"
-        Closing="OverlayWindow_Closing"
-        >
+        Closing="OverlayWindow_Closing">
     <Window.Resources>
         <conv:MathConverter x:Key="MathConverter" />
+
+        <!-- Drop shadow effect for modern look -->
+        <DropShadowEffect x:Key="CardShadow"
+                          Color="#000000"
+                          BlurRadius="20"
+                          ShadowDepth="0"
+                          Opacity="0.15" />
     </Window.Resources>
+
     <Grid>
-        <Border x:Name="BgBorder" Background="#111111"
+        <!-- Background with modern rounded corners and shadow -->
+        <Border x:Name="BgBorder"
+                Background="#111111"
                 Opacity="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=BackgroundOpacity}"
-                CornerRadius="10">
+                CornerRadius="12"
+                Effect="{StaticResource CardShadow}">
             <Border.Style>
                 <Style TargetType="Border">
                     <Setter Property="Visibility" Value="Visible" />
@@ -32,13 +42,15 @@
             </Border.Style>
         </Border>
 
-        <Grid x:Name="ContentGrid" Margin="10"
+        <!-- Content area with improved spacing -->
+        <Grid x:Name="ContentGrid"
+              Margin="16"
               Opacity="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=TextOpacity}"
               TextElement.Foreground="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=TextBrush}"
               TextElement.FontSize="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=TextFontSize}">
             <Grid.Style>
                 <Style TargetType="Grid">
-                    <Setter Property="Margin" Value="10" />
+                    <Setter Property="Margin" Value="16" />
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=ShowBackground}" Value="False">
                             <Setter Property="Margin" Value="0" />
@@ -46,19 +58,58 @@
                     </Style.Triggers>
                 </Style>
             </Grid.Style>
+
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Text="待办事项" FontWeight="Bold"
-                       FontSize="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=TextFontSize, Converter={StaticResource MathConverter}, ConverterParameter=+2}"
-                       Foreground="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=TextBrush}" />
+            <!-- Header with icon and title -->
+            <Grid Grid.Row="0" Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-            <ListBox Grid.Row="1" ItemsSource="{Binding PinnedView}" Background="Transparent" BorderThickness="0" Margin="0,8,0,0"
-                    Focusable="False" IsTabStop="False" FocusVisualStyle="{x:Null}"
-                    ScrollViewer.VerticalScrollBarVisibility="Hidden"
-                    ScrollViewer.HorizontalScrollBarVisibility="Hidden">
+                <!-- Pin icon -->
+                <Viewbox Grid.Column="0" Width="18" Height="18"
+                         VerticalAlignment="Center" Margin="0,0,8,0">
+                    <Canvas Width="24" Height="24">
+                        <Path Data="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z"
+                              Fill="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=TextBrush}" />
+                    </Canvas>
+                </Viewbox>
+
+                <!-- Title -->
+                <TextBlock Grid.Column="1"
+                           Text="待办事项"
+                           FontWeight="SemiBold"
+                           FontSize="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=TextFontSize, Converter={StaticResource MathConverter}, ConverterParameter=+4}"
+                           Foreground="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=TextBrush}"
+                           VerticalAlignment="Center" />
+            </Grid>
+
+            <!-- Separator line -->
+            <Border Grid.Row="1"
+                    Height="1"
+                    Margin="0,0,0,12"
+                    Opacity="0.2">
+                <Border.Background>
+                    <SolidColorBrush Color="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=TextBrush.Color}" />
+                </Border.Background>
+            </Border>
+
+            <!-- Todo items list with improved styling -->
+            <ListBox Grid.Row="2"
+                     ItemsSource="{Binding PinnedView}"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     Focusable="False"
+                     IsTabStop="False"
+                     FocusVisualStyle="{x:Null}"
+                     ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                     ScrollViewer.HorizontalScrollBarVisibility="Hidden">
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
                         <Setter Property="Focusable" Value="False" />
@@ -68,13 +119,16 @@
                         <Setter Property="BorderBrush" Value="Transparent" />
                         <Setter Property="BorderThickness" Value="0" />
                         <Setter Property="Padding" Value="0" />
-                        <Setter Property="Margin" Value="0" />
+                        <Setter Property="Margin" Value="0,0,0,0" />
                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                     <Setter Property="VerticalContentAlignment" Value="Center" />
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="ListBoxItem">
-                                    <Border Background="Transparent" BorderBrush="Transparent" BorderThickness="0" SnapsToDevicePixels="True">
+                                    <Border Background="Transparent"
+                                            BorderBrush="Transparent"
+                                            BorderThickness="0"
+                                            SnapsToDevicePixels="True">
                                         <ContentPresenter SnapsToDevicePixels="True"
                                                           HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                                           VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
@@ -86,15 +140,36 @@
                 </ListBox.ItemContainerStyle>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Orientation="Horizontal" Margin="0,4">
-                            <Ellipse Margin="0,0,6,0"
-                                     VerticalAlignment="Center"
-                                     Width="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=TextFontSize, Converter={StaticResource MathConverter}, ConverterParameter=*0.55}"
-                                     Height="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=TextFontSize, Converter={StaticResource MathConverter}, ConverterParameter=*0.55}"
-                                     Fill="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=TextBrush}" />
-                            <TextBlock FontWeight="Bold" Text="{Binding Text}" TextWrapping="Wrap"
-                                       Foreground="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=TextBrush}" />
-                        </StackPanel>
+                        <!-- Modern card-style item -->
+                        <Border CornerRadius="6"
+                                Padding="10,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Modern bullet point -->
+                                <Border Grid.Column="0"
+                                        Width="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=TextFontSize, Converter={StaticResource MathConverter}, ConverterParameter=*0.5}"
+                                        Height="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=TextFontSize, Converter={StaticResource MathConverter}, ConverterParameter=*0.5}"
+                                        CornerRadius="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=TextFontSize, Converter={StaticResource MathConverter}, ConverterParameter=*0.25}"
+                                        Margin="0,6,10,0"
+                                        VerticalAlignment="Top">
+                                    <Border.Background>
+                                        <SolidColorBrush Color="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=TextBrush.Color}" />
+                                    </Border.Background>
+                                </Border>
+
+                                <!-- Todo text with better line height -->
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding Text}"
+                                           TextWrapping="Wrap"
+                                           FontWeight="Medium"
+                                           LineHeight="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=TextFontSize, Converter={StaticResource MathConverter}, ConverterParameter=*1.5}"
+                                           Foreground="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=TextBrush}" />
+                            </Grid>
+                        </Border>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
